@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>an-application-of-the-OTrecod-package</title>
+
+<style type="text/css">
+a.anchor-section {margin-left: 10px; visibility: hidden; color: inherit;}
+a.anchor-section::before {content: '#';}
+.hasAnchor:hover a.anchor-section {visibility: visible;}
+</style>
+<script>// Anchor sections v1.0 written by Atsushi Yasumoto on Oct 3rd, 2020.
+document.addEventListener('DOMContentLoaded', function() {
+  // Do nothing if AnchorJS is used
+  if (typeof window.anchors === 'object' && anchors.hasOwnProperty('hasAnchorJSLink')) {
+    return;
+  }
+
+  const h = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+  // Do nothing if sections are already anchored
+  if (Array.from(h).some(x => x.classList.contains('hasAnchor'))) {
+    return null;
+  }
+
+  // Use section id when pandoc runs with --section-divs
+  const section_id = function(x) {
+    return ((x.classList.contains('section') || (x.tagName === 'SECTION'))
+            ? x.id : '');
+  };
+
+  // Add anchors
+  h.forEach(function(x) {
+    const id = x.id || section_id(x.parentElement);
+    if (id === '') {
+      return null;
+    }
+    let anchor = document.createElement('a');
+    anchor.href = '#' + id;
+    anchor.classList = ['anchor-section'];
+    x.classList.add('hasAnchor');
+    x.appendChild(anchor);
+  });
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">an-application-of-the-OTrecod-package</h1>
+
+
+
+<div id="package-installation" class="section level2">
+<h2>Package installation</h2>
+<p>If the package <strong>OTrecod</strong> is not installed in their current R versions, users can install it by following the standard instruction:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">install.packages</span>(<span class="st">&quot;OTrecod&quot;</span>)</a></code></pre></div>
+<p>Each time an R session is opened, the <strong>OTrecod</strong> library must be loaded with:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">library</span>(OTrecod)</a></code></pre></div>
+<p>Moreover, the development version of <strong>OTrecod</strong> can be installed actually from <a href="https://github.com/otrecoding/OTrecod">GitHub</a> with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># Install development version from GitHub</span></a>
+<a class="sourceLine" id="cb3-2" title="2">devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;otrecoding/OTrecod&quot;</span>)</a></code></pre></div>
+<p> </p>
+</div>
+<div id="i.-the-context" class="section level2">
+<h2>I. The context</h2>
+<p align="justify">
+This vignette illustrates how to use the tools contained in the <strong>OTrecod</strong> package to solve a variable recoding problem frequently encountered in the context of data fusion. For more details about the theory of the algorithms used in the functions <strong>OT_outcome</strong> and <strong>OT_joint</strong> of the package, user can consult (1),(2) and the documentation linked to each function.
+</p>
+<p align="justify">
+For this example, we have transformed an available database called <em>samp.A</em> from the <strong>StatMatch</strong> package (see (3) and the help of <em>samp.A</em> for more details). The <em>samp.A</em> database provides a limited number of variables observed at persons levels among those usually collected in the <em>European Union Statistics on Income and Living Conditions Survey</em> (the EU–SILC survey). In this database, the variable <em>c.neti</em> is a factor that corresponds to the persons net income of thousand of Euros categorized in 7 ordered classes. The raw distribution of <em>c.neti</em> is done in the following results:
+</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw">library</span>(StatMatch)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw">data</span>(samp.A)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">dim</span>(samp.A)</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co">#&gt; [1] 3009   13</span></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="kw">head</span>(samp.A)</a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&gt;        HH.P.id area5 urb hsize hsize5 age    c.age sex marital edu7 n.income</span></a>
+<a class="sourceLine" id="cb5-5" title="5"><span class="co">#&gt; 21384 10149.01    NE   1     1      1  85 (64,104]   2       3    3     1677</span></a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="co">#&gt; 35973 17154.02    NE   1     2      2  78 (64,104]   1       2    3    13520</span></a>
+<a class="sourceLine" id="cb5-7" title="7"><span class="co">#&gt; 11774  5628.01    NO   2     1      1  48  (44,54]   1       3    3    20000</span></a>
+<a class="sourceLine" id="cb5-8" title="8"><span class="co">#&gt; 32127 15319.01     S   1     2      2  78 (64,104]   1       2    1    12428</span></a>
+<a class="sourceLine" id="cb5-9" title="9"><span class="co">#&gt; 6301   2973.05     S   2     5    &gt;=5  17  [16,34]   1       1    1        0</span></a>
+<a class="sourceLine" id="cb5-10" title="10"><span class="co">#&gt; 12990  6206.02     C   2     2      2  28  [16,34]   2       2    5        0</span></a>
+<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt;         c.neti        ww</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt; 21384   (0,10] 3591.8939</span></a>
+<a class="sourceLine" id="cb5-13" title="13"><span class="co">#&gt; 35973  (10,15]  415.1592</span></a>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt; 11774  (15,20] 2735.4029</span></a>
+<a class="sourceLine" id="cb5-15" title="15"><span class="co">#&gt; 32127  (10,15] 1239.5086</span></a>
+<a class="sourceLine" id="cb5-16" title="16"><span class="co">#&gt; 6301  (-Inf,0] 5362.7588</span></a>
+<a class="sourceLine" id="cb5-17" title="17"><span class="co">#&gt; 12990 (-Inf,0] 2077.7137</span></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="kw">table</span>(samp.A<span class="op">$</span>c.neti)   <span class="co"># Repartition of c.neti in the sample</span></a>
+<a class="sourceLine" id="cb5-19" title="19"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb5-20" title="20"><span class="co">#&gt;  (-Inf,0]    (0,10]   (10,15]   (15,20]   (20,25]   (25,35] (35, Inf] </span></a>
+<a class="sourceLine" id="cb5-21" title="21"><span class="co">#&gt;       564       671       541       500       307       272       154</span></a></code></pre></div>
+<p align="justify">
+<p>To construct a standard recoding problem in data fusion, the <em>samp.A</em> database has been transformed as follows:</p>
+<ul>
+<li>From the <em>c.neti</em> variable, we built a variable called <em>c.neti.bis</em> that corresponds to a second encoding of the persons net income now coded in 4 ordered levels (1: by grouping the first two levels of <em>c.neti</em>, 2: by grouping the two subsequent levels of <em>c.neti</em>, 3: by grouping the last two levels).</li>
+<li>To improve the running time of the example, we only kept the first 350 subjects (rows) of <em>samp.A</em>.</li>
+<li>This new sample has been randomly divided in two distinct subsamples called <em>data1</em> (200 rows: subjects 1 to 200) and <em>data2</em> (150 rows: sujects 201 to 350).</li>
+<li>The <em>c.neti.bis</em> variable has been excluded from <em>data1</em> and respectively <em>c.neti</em> have been excluded from <em>data2</em>.</li>
+<li>Among the other variables, a random subset of them have been assigned in each database.</li>
+</ul>
+The R code related to these transformations was:
+</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">c.neti            =<span class="st"> </span><span class="kw">as.numeric</span>(samp.A<span class="op">$</span>c.neti)</a>
+<a class="sourceLine" id="cb6-2" title="2">samp.A<span class="op">$</span>c.neti.bis =<span class="st"> </span><span class="kw">as.factor</span>(<span class="kw">ifelse</span>(c.neti <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>),<span class="dv">1</span>, </a>
+<a class="sourceLine" id="cb6-3" title="3">                              <span class="kw">ifelse</span>(c.neti <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dv">2</span>, </a>
+<a class="sourceLine" id="cb6-4" title="4">                              <span class="kw">ifelse</span>(c.neti <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">6</span>),<span class="dv">3</span>,<span class="dv">4</span>)))) </a>
+<a class="sourceLine" id="cb6-5" title="5">data1 =<span class="st"> </span>samp.A[<span class="dv">1</span><span class="op">:</span><span class="dv">200</span>,<span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span><span class="op">:</span><span class="dv">9</span>,<span class="dv">12</span><span class="op">:</span><span class="dv">13</span>)]</a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="kw">colnames</span>(data1)[<span class="dv">4</span>] =<span class="st"> &quot;age&quot;</span> </a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="kw">head</span>(data1)</a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt;       area5 urb hsize5      age sex marital   c.neti        ww</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; 21384    NE   1      1 (64,104]   2       3   (0,10] 3591.8939</span></a>
+<a class="sourceLine" id="cb6-10" title="10"><span class="co">#&gt; 35973    NE   1      2 (64,104]   1       2  (10,15]  415.1592</span></a>
+<a class="sourceLine" id="cb6-11" title="11"><span class="co">#&gt; 11774    NO   2      1  (44,54]   1       3  (15,20] 2735.4029</span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="co">#&gt; 32127     S   1      2 (64,104]   1       2  (10,15] 1239.5086</span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt; 6301      S   2    &gt;=5  [16,34]   1       1 (-Inf,0] 5362.7588</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; 12990     C   2      2  [16,34]   2       2 (-Inf,0] 2077.7137</span></a>
+<a class="sourceLine" id="cb6-15" title="15">data2 =<span class="st"> </span>samp.A[<span class="dv">201</span><span class="op">:</span><span class="dv">350</span>,<span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">5</span><span class="op">:</span><span class="dv">6</span>,<span class="dv">8</span><span class="op">:</span><span class="dv">11</span>,<span class="dv">13</span><span class="op">:</span><span class="dv">14</span>)]</a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="kw">head</span>(data2)</a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt;       urb hsize5 age sex marital edu7 n.income       ww c.neti.bis</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; 39565   3      2  81   2       2    1     6448 1129.274          1</span></a>
+<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; 36490   1    &gt;=5  48   1       3    2    16423 3082.331          2</span></a>
+<a class="sourceLine" id="cb6-20" title="20"><span class="co">#&gt; 27529   2      2  66   1       2    3    15600 2433.020          2</span></a>
+<a class="sourceLine" id="cb6-21" title="21"><span class="co">#&gt; 201     2      4  26   1       1    3    12876 1869.286          2</span></a>
+<a class="sourceLine" id="cb6-22" title="22"><span class="co">#&gt; 31375   2      2  53   1       2    3    25633 2125.361          3</span></a>
+<a class="sourceLine" id="cb6-23" title="23"><span class="co">#&gt; 3226    3      1  45   2       3    3     2611 1855.230          1</span></a></code></pre></div>
+<p align="justify">
+<p>In conclusion, after transformation, we had:</p>
+<ul>
+<li>two separate databases <em>data1</em> and <em>data2</em> with no common subjet.</li>
+<li><em>c.neti</em> and <em>c.neti.bis</em>: two variables that summarize a same information (the persons net income) encoded in two different scales in <em>data1</em> and <em>data2</em>.</li>
+<li>a subset of shared variables between the two databases (variables with same labels in the 2 databases).</li>
+<li>subsets of specific variables
+</p></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">table</span>(data1<span class="op">$</span>c.neti)        <span class="co"># 7 levels in data1</span></a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb7-3" title="3"><span class="co">#&gt;  (-Inf,0]    (0,10]   (10,15]   (15,20]   (20,25]   (25,35] (35, Inf] </span></a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="co">#&gt;        37        40        34        49        18        13         9</span></a>
+<a class="sourceLine" id="cb7-5" title="5"></a>
+<a class="sourceLine" id="cb7-6" title="6"><span class="kw">table</span>(data2<span class="op">$</span>c.neti.bis)    <span class="co"># 4 levels in data2</span></a>
+<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&gt;  1  2  3  4 </span></a>
+<a class="sourceLine" id="cb7-9" title="9"><span class="co">#&gt; 60 57 26  7</span></a>
+<a class="sourceLine" id="cb7-10" title="10"></a>
+<a class="sourceLine" id="cb7-11" title="11"><span class="kw">colnames</span>(data1)</a>
+<a class="sourceLine" id="cb7-12" title="12"><span class="co">#&gt; [1] &quot;area5&quot;   &quot;urb&quot;     &quot;hsize5&quot;  &quot;age&quot;     &quot;sex&quot;     &quot;marital&quot; &quot;c.neti&quot; </span></a>
+<a class="sourceLine" id="cb7-13" title="13"><span class="co">#&gt; [8] &quot;ww&quot;</span></a>
+<a class="sourceLine" id="cb7-14" title="14"></a>
+<a class="sourceLine" id="cb7-15" title="15"><span class="kw">colnames</span>(data2)</a>
+<a class="sourceLine" id="cb7-16" title="16"><span class="co">#&gt; [1] &quot;urb&quot;        &quot;hsize5&quot;     &quot;age&quot;        &quot;sex&quot;        &quot;marital&quot;   </span></a>
+<a class="sourceLine" id="cb7-17" title="17"><span class="co">#&gt; [6] &quot;edu7&quot;       &quot;n.income&quot;   &quot;ww&quot;         &quot;c.neti.bis&quot;</span></a>
+<a class="sourceLine" id="cb7-18" title="18"></a>
+<a class="sourceLine" id="cb7-19" title="19"><span class="kw">intersect</span>(<span class="kw">colnames</span>(data1), <span class="kw">colnames</span>(data2))   <span class="co"># the susbet of a priori shared variables</span></a>
+<a class="sourceLine" id="cb7-20" title="20"><span class="co">#&gt; [1] &quot;urb&quot;     &quot;hsize5&quot;  &quot;age&quot;     &quot;sex&quot;     &quot;marital&quot; &quot;ww&quot;</span></a></code></pre></div>
+<strong>OBJECTIVE</strong>
+<p align="justify">
+<strong>Assuming that the encoding of <em>c.neti</em> is unknown for the subjects of <em>data2</em> and that the encoding of <em>c.neti.bis</em> is unknown for the subjects of <em>data1</em>, the functions of the OTrecod package solve this recoding problem by predicting the missing scale of the persons net income in one or the two databases. This solution allows the user to fusion his two databases and finally works with a bigger, unique and synthetic dataset.</strong>
+</p>
+<p align="justify">
+<p>For the rest of the study, <em>c.neti</em> and <em>c.neti.bis</em> are called the target variables of <em>data1</em> and <em>data2</em> respectively. we deliberately limit this example to the prediction of the variable <em>c.neti.bis</em> in <em>data1</em> but note that the proposed approach would be the same for the prediction of <em>c.neti</em> in <em>data1</em>.</p>
+</p>
+<p> </p>
+</div>
+<div id="ii.-harmonization-of-the-data-sources" class="section level2">
+<h2>II. Harmonization of the data sources</h2>
+<p align="justify">
+<p>Knowing the objective of the study, we first prepare the 2 databases to data fusion. The two functions dedicated to this data fusion in the <strong>OTrecod</strong> package expect a specific structure of database as argument. The <strong>merge_dbs</strong> function assists user in this task by:</p>
+<ul>
+<li>overlaying the two databases</li>
+<li>detecting the false shared variables</li>
+<li>imputing incomplete information of shared variables if desired.</li>
+</ul>
+For this, we fill in the arguments of the <strong>merge_dbs</strong> function by declaring as follows, the column indexes of all the ordinal variables in <em>data1</em> and <em>data2</em> (including the target variables indexes). Here there is no need to handle missing information because all the shared variables are complete, but note that it exists a specific argument (<em>impute</em>) in the function to take them into account when necessary.
+</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">db_test  =<span class="st"> </span><span class="kw">merge_dbs</span>(data1, data2, <span class="dt">NAME_Y =</span> <span class="st">&quot;c.neti&quot;</span>, <span class="dt">NAME_Z =</span> <span class="st">&quot;c.neti.bis&quot;</span>,</a>
+<a class="sourceLine" id="cb8-2" title="2">                     <span class="dt">ordinal_DB1 =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">7</span>), <span class="dt">ordinal_DB2 =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,<span class="dv">6</span>,<span class="dv">9</span>))</a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="co">#&gt; DBS MERGING in progress. Please wait ...</span></a>
+<a class="sourceLine" id="cb8-4" title="4"><span class="co">#&gt; DBS MERGING OK</span></a>
+<a class="sourceLine" id="cb8-5" title="5"><span class="co">#&gt; -----------------------</span></a>
+<a class="sourceLine" id="cb8-6" title="6"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb8-7" title="7"><span class="co">#&gt; SUMMARY OF DBS MERGING:</span></a>
+<a class="sourceLine" id="cb8-8" title="8"><span class="co">#&gt; Nb of removed subjects because of NA on targets: 0(0%)</span></a>
+<a class="sourceLine" id="cb8-9" title="9"><span class="co">#&gt; Nb of covariates removed because of differences between the 2 bases: 1</span></a>
+<a class="sourceLine" id="cb8-10" title="10"><span class="co">#&gt; Nb of covariates remained: 5</span></a>
+<a class="sourceLine" id="cb8-11" title="11"><span class="co">#&gt; Imputation on incomplete covariates: NO</span></a>
+<a class="sourceLine" id="cb8-12" title="12"></a>
+<a class="sourceLine" id="cb8-13" title="13"><span class="kw">summary</span>(db_test)</a>
+<a class="sourceLine" id="cb8-14" title="14"><span class="co">#&gt;               Length Class      Mode     </span></a>
+<a class="sourceLine" id="cb8-15" title="15"><span class="co">#&gt; DB_READY      8      data.frame list     </span></a>
+<a class="sourceLine" id="cb8-16" title="16"><span class="co">#&gt; ID1_drop      0      -none-     character</span></a>
+<a class="sourceLine" id="cb8-17" title="17"><span class="co">#&gt; ID2_drop      0      -none-     character</span></a>
+<a class="sourceLine" id="cb8-18" title="18"><span class="co">#&gt; Y_LEVELS      7      -none-     character</span></a>
+<a class="sourceLine" id="cb8-19" title="19"><span class="co">#&gt; Z_LEVELS      4      -none-     character</span></a>
+<a class="sourceLine" id="cb8-20" title="20"><span class="co">#&gt; REMOVE1       1      -none-     character</span></a>
+<a class="sourceLine" id="cb8-21" title="21"><span class="co">#&gt; REMOVE2       0      -none-     NULL     </span></a>
+<a class="sourceLine" id="cb8-22" title="22"><span class="co">#&gt; REMAINING_VAR 5      -none-     character</span></a>
+<a class="sourceLine" id="cb8-23" title="23"><span class="co">#&gt; IMPUTE_TYPE   1      -none-     character</span></a>
+<a class="sourceLine" id="cb8-24" title="24"><span class="co">#&gt; DB1_raw       8      data.frame list     </span></a>
+<a class="sourceLine" id="cb8-25" title="25"><span class="co">#&gt; DB2_raw       9      data.frame list     </span></a>
+<a class="sourceLine" id="cb8-26" title="26"><span class="co">#&gt; SEED          1      -none-     numeric</span></a>
+<a class="sourceLine" id="cb8-27" title="27"></a>
+<a class="sourceLine" id="cb8-28" title="28">db_test<span class="op">$</span>REMAINING_VAR</a>
+<a class="sourceLine" id="cb8-29" title="29"><span class="co">#&gt; [1] &quot;hsize5&quot;  &quot;marital&quot; &quot;sex&quot;     &quot;urb&quot;     &quot;ww&quot;</span></a>
+<a class="sourceLine" id="cb8-30" title="30"></a>
+<a class="sourceLine" id="cb8-31" title="31">db_test<span class="op">$</span>REMOVE1</a>
+<a class="sourceLine" id="cb8-32" title="32"><span class="co">#&gt; [1] &quot;age&quot;</span></a>
+<a class="sourceLine" id="cb8-33" title="33"></a>
+<a class="sourceLine" id="cb8-34" title="34">db_test<span class="op">$</span>REMOVE2</a>
+<a class="sourceLine" id="cb8-35" title="35"><span class="co">#&gt; NULL</span></a>
+<a class="sourceLine" id="cb8-36" title="36"></a>
+<a class="sourceLine" id="cb8-37" title="37">db_test<span class="op">$</span>ID1_drop; db_test<span class="op">$</span>ID2_drop</a>
+<a class="sourceLine" id="cb8-38" title="38"><span class="co">#&gt; character(0)</span></a>
+<a class="sourceLine" id="cb8-39" title="39"><span class="co">#&gt; character(0)</span></a>
+<a class="sourceLine" id="cb8-40" title="40"></a>
+<a class="sourceLine" id="cb8-41" title="41">db_test<span class="op">$</span>DB_READY[<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">201</span><span class="op">:</span><span class="dv">205</span>),]   <span class="co"># The 5 1st subjects of the two databases </span></a>
+<a class="sourceLine" id="cb8-42" title="42"><span class="co">#&gt;       DB        Y    Z hsize5 marital sex urb        ww</span></a>
+<a class="sourceLine" id="cb8-43" title="43"><span class="co">#&gt; 21384  1   (0,10] &lt;NA&gt;      1       3   2   1 3591.8939</span></a>
+<a class="sourceLine" id="cb8-44" title="44"><span class="co">#&gt; 35973  1  (10,15] &lt;NA&gt;      2       2   1   1  415.1592</span></a>
+<a class="sourceLine" id="cb8-45" title="45"><span class="co">#&gt; 11774  1  (15,20] &lt;NA&gt;      1       3   1   2 2735.4029</span></a>
+<a class="sourceLine" id="cb8-46" title="46"><span class="co">#&gt; 32127  1  (10,15] &lt;NA&gt;      2       2   1   1 1239.5086</span></a>
+<a class="sourceLine" id="cb8-47" title="47"><span class="co">#&gt; 6301   1 (-Inf,0] &lt;NA&gt;    &gt;=5       1   1   2 5362.7588</span></a>
+<a class="sourceLine" id="cb8-48" title="48"><span class="co">#&gt; 39565  2     &lt;NA&gt;    1      2       2   2   3 1129.2739</span></a>
+<a class="sourceLine" id="cb8-49" title="49"><span class="co">#&gt; 36490  2     &lt;NA&gt;    2    &gt;=5       3   1   1 3082.3314</span></a>
+<a class="sourceLine" id="cb8-50" title="50"><span class="co">#&gt; 27529  2     &lt;NA&gt;    2      2       2   1   2 2433.0201</span></a>
+<a class="sourceLine" id="cb8-51" title="51"><span class="co">#&gt; 201    2     &lt;NA&gt;    2      4       1   1   2 1869.2859</span></a>
+<a class="sourceLine" id="cb8-52" title="52"><span class="co">#&gt; 31375  2     &lt;NA&gt;    3      2       2   1   2 2125.3614</span></a></code></pre></div>
+<p align="justify">
+<p>In output:</p>
+<ul>
+<li>The <em>REMAINING_VAR</em> object gives the identity of the shared variables kept for the merging of the two databases.</li>
+<li>The <em>REMOVE1</em> object gives the identity of potential shared variables dropped because of dicrepancies of types: the variable <em>age</em> stored as factor in <em>data1</em> and as numeric in <em>data2</em> is in this case. Sometimes it is possible to reconciliate the two encodings a posteriori, sometimes not. Here it would be possible to categorize the variable <em>age</em> in <em>data2</em> in the same way as <em>age</em> in <em>data1</em> but we decide for the example to discard it for the rest of the study.</li>
+<li>The <em>REMOVE2</em> object is null, and this result means that there is no factor dropped because of discrepancies of levels.</li>
+<li>The <em>ID1_drop</em> and <em>ID2_drop</em> objects are null which means that the target variables <em>c.neti</em> and <em>c.neti.bis</em> have no missing values in there respective databases.</li>
+<li>Finally the <em>DB_READY</em> object provides users a synthetic database that overlays <em>data1</em> and <em>data2</em> (in this order) where the <em>DB</em> variable is the database identifier.</li>
+</ul>
+The variable <em>Y</em> now corresponds to the target variable <em>c.neti</em> with its specific encoding in <em>data1</em> and missing values in <em>data2</em>. In the same way, the variable <em>Z</em> corresponds to <em>c.neti.bis</em>. This database have the structure expected as argument of the <strong>OT_outcome</strong> and <strong>OT_joint</strong> functions.
+</p>
+<p> </p>
+</div>
+<div id="iii.-selection-of-the-matching-variables" class="section level2">
+<h2>III. Selection of the matching variables</h2>
+<p align="justify">
+Among the set of shared variables kept in the output <em>DB.READY</em> database of the <strong>merge_dbs</strong>, it is important to discard those that never appear not good predictors of the persons net income whatever the considered database. The subset of remaining variables will be the matching variables. This selection of matching variables can be done using the <strong>select_pred</strong> function of the package.
+</p>
+<p align="justify">
+<p>This function proposes two levels of study to conclude:</p>
+<ul>
+<li>When the sample of shared variables is small, standard correlation studies are often enough to select the best set of predictors and get rid of potential multicolinearities between the candidates.</li>
+<li>When the conclusion of the first part appears not so clear, this study can be completed by a random forest (RF) process of selection (see <em>RF</em> argument). This part is notably particularly convenient when the sample of covariates is large. The function proposes two random forest procedures: The standard RF which estimates the permutation importance criterion of each shared variable and the conditional importance measures from the <em>proxy</em> package ((4)).</li>
+</ul>
+At this step, the choice of the recoding algorithm (see (2)) to use a posteriori must be anticipated in the handling of the potential numeric shared variables (In this example, the <em>ww</em> variable is the only one concerned. Indeed, if the <strong>OT_outcome</strong> function runs whatever the type considered, this is not the case of the actual version of the <strong>OT_joint</strong> version which not allows the numeric variable. For this vignette we will test the two algorithms, so we decide to transform <em>ww</em> as categorial using the quartiles of its distribution as thresholds of the four classes. This transformation can be dealt by standard R function (like <em>cut()</em>) or directly in the functions using the <em>convert_num</em> and <em>convert_clss</em> arguments dedicated to this task.
+</p>
+<p align="justify">
+The selection of the best predictors of the persons net income must be done in the two databases separately but the <strong>selec_pred</strong> functions allowed overlayed databases as arguments using the following code:
+</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="co"># for data1</span></a>
+<a class="sourceLine" id="cb9-2" title="2">test_DB1 =<span class="st"> </span><span class="kw">select_pred</span>(db_test<span class="op">$</span>DB_READY,<span class="dt">Y =</span> <span class="st">&quot;Y&quot;</span>, <span class="dt">Z =</span> <span class="st">&quot;Z&quot;</span>, <span class="dt">ID =</span> <span class="dv">1</span>, <span class="dt">OUT =</span> <span class="st">&quot;Y&quot;</span>,</a>
+<a class="sourceLine" id="cb9-3" title="3">                       <span class="dt">quanti =</span> <span class="dv">8</span>, <span class="dt">nominal =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span><span class="op">:</span><span class="dv">6</span>,<span class="dv">7</span>), <span class="dt">ordinal =</span> <span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>),</a>
+<a class="sourceLine" id="cb9-4" title="4">                       <span class="dt">convert_num =</span> <span class="dv">8</span>, <span class="dt">convert_clss =</span> <span class="dv">4</span>,</a>
+<a class="sourceLine" id="cb9-5" title="5">                       <span class="dt">thresh_cat =</span> <span class="fl">0.30</span>, <span class="dt">thresh_num =</span> <span class="fl">0.70</span>, <span class="dt">thresh_Y =</span> <span class="fl">0.10</span>,</a>
+<a class="sourceLine" id="cb9-6" title="6">                       <span class="dt">RF =</span> <span class="ot">TRUE</span>, <span class="dt">RF_SEED =</span> <span class="dv">3017</span>)</a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; The select_pred function is running. Please wait ...</span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; Risks of collinearity between predictors detected. Consult outputs for more details ...</span></a>
+<a class="sourceLine" id="cb9-9" title="9"></a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co"># for data2</span></a>
+<a class="sourceLine" id="cb9-11" title="11">test_DB2 =<span class="st"> </span><span class="kw">select_pred</span>(db_test<span class="op">$</span>DB_READY,<span class="dt">Y =</span> <span class="st">&quot;Y&quot;</span>, <span class="dt">Z =</span> <span class="st">&quot;Z&quot;</span>, <span class="dt">ID =</span> <span class="dv">1</span>, <span class="dt">OUT =</span> <span class="st">&quot;Z&quot;</span>,</a>
+<a class="sourceLine" id="cb9-12" title="12">                       <span class="dt">quanti =</span> <span class="dv">8</span>, <span class="dt">nominal =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span><span class="op">:</span><span class="dv">6</span>,<span class="dv">7</span>), <span class="dt">ordinal =</span> <span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>),</a>
+<a class="sourceLine" id="cb9-13" title="13">                       <span class="dt">convert_num =</span> <span class="dv">8</span>, <span class="dt">convert_clss =</span> <span class="dv">4</span>,</a>
+<a class="sourceLine" id="cb9-14" title="14">                       <span class="dt">thresh_cat =</span> <span class="fl">0.30</span>, <span class="dt">thresh_num =</span> <span class="fl">0.70</span>, <span class="dt">thresh_Y =</span> <span class="fl">0.10</span>,</a>
+<a class="sourceLine" id="cb9-15" title="15">                       <span class="dt">RF =</span> <span class="ot">TRUE</span>, <span class="dt">RF_SEED =</span> <span class="dv">3017</span>)</a>
+<a class="sourceLine" id="cb9-16" title="16"><span class="co">#&gt; The select_pred function is running. Please wait ...</span></a>
+<a class="sourceLine" id="cb9-17" title="17"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb9-18" title="18"><span class="co">#&gt; Risks of collinearity between predictors detected. Consult outputs for more details ...</span></a></code></pre></div>
+<p align="justify">
+<p>As input:</p>
+<ul>
+<li>The <em>OUT</em> argument specifies the target variable to predict.</li>
+<li>The <em>thresh_cat</em> argument corresponds to the threshold of the V Cramer coefficient (for the categorical variables) .</li>
+<li>The <em>thresh_num</em> argument corresponds to the threshold of the Spearman correlation coefficient (for the continuous and ordinal variables). Under these values, two shared variables present acceptable colinearities. Under these values, a shared variable is not considered as a good predictor of a target variable.</li>
+<li>The <em>thresh_Y</em> argument is reserved to random forest procedures. It corresponds to an acceptability threshold related to the importance mesure criterions. Variables with a cumulative percent of importance measures less than this threshold will be dropped from the final list of RF predictors.
+</p></li>
+</ul>
+<p align="justify">
+Notice that it is important to keep the same arguments in the two selections (<em>test_DB1</em> and <em>test_DB2</em>) for an optimal comparability. Here the standard RF process is used, and the <em>ww</em> variable is converted in categorical type before the selection using <em>convert_num</em>.
+</p>
+<p>Let see the result for <em>data1</em>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">summary</span>(test_DB1)</a>
+<a class="sourceLine" id="cb10-2" title="2"><span class="co">#&gt;               Length Class      Mode     </span></a>
+<a class="sourceLine" id="cb10-3" title="3"><span class="co">#&gt; seed          1      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb10-4" title="4"><span class="co">#&gt; outc          1      -none-     character</span></a>
+<a class="sourceLine" id="cb10-5" title="5"><span class="co">#&gt; thresh        3      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb10-6" title="6"><span class="co">#&gt; convert_num   1      -none-     character</span></a>
+<a class="sourceLine" id="cb10-7" title="7"><span class="co">#&gt; DB_USED       8      data.frame list     </span></a>
+<a class="sourceLine" id="cb10-8" title="8"><span class="co">#&gt; vcrm_OUTC_cat 5      data.frame list     </span></a>
+<a class="sourceLine" id="cb10-9" title="9"><span class="co">#&gt; cor_OUTC_num  5      data.frame list     </span></a>
+<a class="sourceLine" id="cb10-10" title="10"><span class="co">#&gt; vcrm_X_cat    5      data.frame list     </span></a>
+<a class="sourceLine" id="cb10-11" title="11"><span class="co">#&gt; cor_X_num     5      data.frame list     </span></a>
+<a class="sourceLine" id="cb10-12" title="12"><span class="co">#&gt; FG_test       3      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb10-13" title="13"><span class="co">#&gt; collinear_PB  2      -none-     list     </span></a>
+<a class="sourceLine" id="cb10-14" title="14"><span class="co">#&gt; drop_var      1      -none-     character</span></a>
+<a class="sourceLine" id="cb10-15" title="15"><span class="co">#&gt; RF_PRED       4      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb10-16" title="16"><span class="co">#&gt; RF_best       2      -none-     character</span></a>
+<a class="sourceLine" id="cb10-17" title="17"></a>
+<a class="sourceLine" id="cb10-18" title="18">test_DB1<span class="op">$</span>vcrm_OUTC_cat</a>
+<a class="sourceLine" id="cb10-19" title="19"><span class="co">#&gt;   name1   name2 V_Cramer CorrV_Cramer   N</span></a>
+<a class="sourceLine" id="cb10-20" title="20"><span class="co">#&gt; 4     Y     sex   0.4384       0.4036 200</span></a>
+<a class="sourceLine" id="cb10-21" title="21"><span class="co">#&gt; 3     Y marital   0.2452       0.1740 200</span></a>
+<a class="sourceLine" id="cb10-22" title="22"><span class="co">#&gt; 5     Y     urb   0.1703       0.0000 200</span></a>
+<a class="sourceLine" id="cb10-23" title="23"><span class="co">#&gt; 2     Y  hsize5   0.1634       0.0000 200</span></a>
+<a class="sourceLine" id="cb10-24" title="24"><span class="co">#&gt; 6     Y      ww   0.1465       0.0000 200</span></a>
+<a class="sourceLine" id="cb10-25" title="25"></a>
+<a class="sourceLine" id="cb10-26" title="26">test_DB1<span class="op">$</span>collinear_PB</a>
+<a class="sourceLine" id="cb10-27" title="27"><span class="co">#&gt; $VCRAM</span></a>
+<a class="sourceLine" id="cb10-28" title="28"><span class="co">#&gt;     name1   name2 V_Cramer CorrV_Cramer   N</span></a>
+<a class="sourceLine" id="cb10-29" title="29"><span class="co">#&gt; 21 hsize5 marital   0.5038       0.4858 200</span></a>
+<a class="sourceLine" id="cb10-30" title="30"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb10-31" title="31"><span class="co">#&gt; $SPEARM</span></a>
+<a class="sourceLine" id="cb10-32" title="32"><span class="co">#&gt; [1] name1       name2       ABS_COR     pv_COR_test N          </span></a>
+<a class="sourceLine" id="cb10-33" title="33"><span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></a>
+<a class="sourceLine" id="cb10-34" title="34"></a>
+<a class="sourceLine" id="cb10-35" title="35"><span class="co"># Results from RF</span></a>
+<a class="sourceLine" id="cb10-36" title="36">test_DB1<span class="op">$</span>drop_var</a>
+<a class="sourceLine" id="cb10-37" title="37"><span class="co">#&gt; [1] &quot;marital&quot;</span></a>
+<a class="sourceLine" id="cb10-38" title="38"></a>
+<a class="sourceLine" id="cb10-39" title="39">test_DB1<span class="op">$</span>RF_PRED</a>
+<a class="sourceLine" id="cb10-40" title="40"><span class="co">#&gt;     sex  hsize5     urb      ww </span></a>
+<a class="sourceLine" id="cb10-41" title="41"><span class="co">#&gt; 86.8886  7.9677  5.1437  0.0000</span></a></code></pre></div>
+<p align="justify">
+In the set of shared variables, all variables are now categorical (factors or ordered factors). According to the <em>vcrm_OUTC_cat</em> output object, the best predictors of <em>c.neti</em> are: <em>sex</em>, <em>marital</em>, <em>urb</em>, <em>hsize5</em>, and <em>ww</em> in that order. Nevertheless, a risk of collinearity is detected between <em>marital</em> and <em>hsize5</em>. The RF process finally suggests to drop <em>marital</em> and to keep only <em>sex</em>, <em>hsize5</em> and eventually <em>urb</em> as matching variables.
+</p>
+<p>Let see the result for <em>data2</em>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">summary</span>(test_DB2)</a>
+<a class="sourceLine" id="cb11-2" title="2"><span class="co">#&gt;               Length Class      Mode     </span></a>
+<a class="sourceLine" id="cb11-3" title="3"><span class="co">#&gt; seed          1      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb11-4" title="4"><span class="co">#&gt; outc          1      -none-     character</span></a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="co">#&gt; thresh        3      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb11-6" title="6"><span class="co">#&gt; convert_num   1      -none-     character</span></a>
+<a class="sourceLine" id="cb11-7" title="7"><span class="co">#&gt; DB_USED       8      data.frame list     </span></a>
+<a class="sourceLine" id="cb11-8" title="8"><span class="co">#&gt; vcrm_OUTC_cat 5      data.frame list     </span></a>
+<a class="sourceLine" id="cb11-9" title="9"><span class="co">#&gt; cor_OUTC_num  5      data.frame list     </span></a>
+<a class="sourceLine" id="cb11-10" title="10"><span class="co">#&gt; vcrm_X_cat    5      data.frame list     </span></a>
+<a class="sourceLine" id="cb11-11" title="11"><span class="co">#&gt; cor_X_num     5      data.frame list     </span></a>
+<a class="sourceLine" id="cb11-12" title="12"><span class="co">#&gt; FG_test       3      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb11-13" title="13"><span class="co">#&gt; collinear_PB  2      -none-     list     </span></a>
+<a class="sourceLine" id="cb11-14" title="14"><span class="co">#&gt; drop_var      1      -none-     character</span></a>
+<a class="sourceLine" id="cb11-15" title="15"><span class="co">#&gt; RF_PRED       4      -none-     numeric  </span></a>
+<a class="sourceLine" id="cb11-16" title="16"><span class="co">#&gt; RF_best       2      -none-     character</span></a>
+<a class="sourceLine" id="cb11-17" title="17"></a>
+<a class="sourceLine" id="cb11-18" title="18">test_DB2<span class="op">$</span>vcrm_OUTC_cat</a>
+<a class="sourceLine" id="cb11-19" title="19"><span class="co">#&gt;   name1   name2 V_Cramer CorrV_Cramer   N</span></a>
+<a class="sourceLine" id="cb11-20" title="20"><span class="co">#&gt; 4     Z     sex   0.4783       0.4583 150</span></a>
+<a class="sourceLine" id="cb11-21" title="21"><span class="co">#&gt; 2     Z  hsize5   0.2343       0.1693 150</span></a>
+<a class="sourceLine" id="cb11-22" title="22"><span class="co">#&gt; 3     Z marital   0.1828       0.1160 150</span></a>
+<a class="sourceLine" id="cb11-23" title="23"><span class="co">#&gt; 5     Z     urb   0.1386       0.0000 150</span></a>
+<a class="sourceLine" id="cb11-24" title="24"><span class="co">#&gt; 6     Z      ww   0.0949       0.0000 150</span></a>
+<a class="sourceLine" id="cb11-25" title="25"></a>
+<a class="sourceLine" id="cb11-26" title="26">test_DB2<span class="op">$</span>collinear_PB</a>
+<a class="sourceLine" id="cb11-27" title="27"><span class="co">#&gt; $VCRAM</span></a>
+<a class="sourceLine" id="cb11-28" title="28"><span class="co">#&gt;     name1   name2 V_Cramer CorrV_Cramer   N</span></a>
+<a class="sourceLine" id="cb11-29" title="29"><span class="co">#&gt; 21 hsize5 marital   0.3555       0.3177 150</span></a>
+<a class="sourceLine" id="cb11-30" title="30"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb11-31" title="31"><span class="co">#&gt; $SPEARM</span></a>
+<a class="sourceLine" id="cb11-32" title="32"><span class="co">#&gt; [1] name1       name2       ABS_COR     pv_COR_test N          </span></a>
+<a class="sourceLine" id="cb11-33" title="33"><span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></a>
+<a class="sourceLine" id="cb11-34" title="34"></a>
+<a class="sourceLine" id="cb11-35" title="35"><span class="co"># Results from RF</span></a>
+<a class="sourceLine" id="cb11-36" title="36">test_DB2<span class="op">$</span>drop_var</a>
+<a class="sourceLine" id="cb11-37" title="37"><span class="co">#&gt; [1] &quot;marital&quot;</span></a>
+<a class="sourceLine" id="cb11-38" title="38"></a>
+<a class="sourceLine" id="cb11-39" title="39">test_DB2<span class="op">$</span>RF_PRED</a>
+<a class="sourceLine" id="cb11-40" title="40"><span class="co">#&gt;     sex  hsize5      ww     urb </span></a>
+<a class="sourceLine" id="cb11-41" title="41"><span class="co">#&gt; 86.1852 13.1555  0.6593  0.0000</span></a></code></pre></div>
+<p align="justify">
+According to the <em>vcrm_OUTC_cat</em> output object, the best predictors of <em>c.neti.bis</em> are: <em>sex</em>, <em>hsize5</em>, <em>marital</em>, <em>urb</em>, and <em>ww</em> in that order. A risk of collinearity is also detected between <em>marital</em> and <em>hsize5</em>. The RF process here suggests to drop <em>marital</em> and to keep only <em>sex</em>, <em>hsize5</em> as matching variables.
+</p>
+<p align="justify">
+<p><strong>In conclusion:</strong></p>
+<ul>
+<li>The variables <em>sex</em> and <em>hsize5</em> are the best predictors of the target variables in the two databases.</li>
+<li>The variable <em>marital</em> is dropped whatever the database because of risks of multicollinearity with <em>hsize5</em>.</li>
+<li>The variable <em>ww</em> is never a good predictor of the target information.</li>
+<li>The variable <em>urb</em> is an acceptable predictor in the first database only.
+</p></li>
+</ul>
+<p>The matching variable groups can be:</p>
+<ul>
+<li><em>sex</em>, <em>hsize5</em></li>
+<li><em>sex</em>, <em>hsize5</em>, and <em>urb</em></li>
+</ul>
+<p align="justify">
+<strong>We finally keep the last group and dropped the other ones for the rest of the example.</strong>
+</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">match_var =<span class="st"> </span>db_test<span class="op">$</span>DB_READY[,<span class="op">-</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">8</span>)]</a>
+<a class="sourceLine" id="cb12-2" title="2">match_var[<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">201</span><span class="op">:</span><span class="dv">205</span>),]</a>
+<a class="sourceLine" id="cb12-3" title="3"><span class="co">#&gt;       DB        Y    Z hsize5 sex urb</span></a>
+<a class="sourceLine" id="cb12-4" title="4"><span class="co">#&gt; 21384  1   (0,10] &lt;NA&gt;      1   2   1</span></a>
+<a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt; 35973  1  (10,15] &lt;NA&gt;      2   1   1</span></a>
+<a class="sourceLine" id="cb12-6" title="6"><span class="co">#&gt; 11774  1  (15,20] &lt;NA&gt;      1   1   2</span></a>
+<a class="sourceLine" id="cb12-7" title="7"><span class="co">#&gt; 32127  1  (10,15] &lt;NA&gt;      2   1   1</span></a>
+<a class="sourceLine" id="cb12-8" title="8"><span class="co">#&gt; 6301   1 (-Inf,0] &lt;NA&gt;    &gt;=5   1   2</span></a>
+<a class="sourceLine" id="cb12-9" title="9"><span class="co">#&gt; 39565  2     &lt;NA&gt;    1      2   2   3</span></a>
+<a class="sourceLine" id="cb12-10" title="10"><span class="co">#&gt; 36490  2     &lt;NA&gt;    2    &gt;=5   1   1</span></a>
+<a class="sourceLine" id="cb12-11" title="11"><span class="co">#&gt; 27529  2     &lt;NA&gt;    2      2   1   2</span></a>
+<a class="sourceLine" id="cb12-12" title="12"><span class="co">#&gt; 201    2     &lt;NA&gt;    2      4   1   2</span></a>
+<a class="sourceLine" id="cb12-13" title="13"><span class="co">#&gt; 31375  2     &lt;NA&gt;    3      2   1   2</span></a></code></pre></div>
+<p><strong>This overlayed database is now ready for recoding.</strong></p>
+<p> </p>
+</div>
+<div id="iv.-predicting-the-missing-scales-in-the-databases" class="section level2">
+<h2>IV. Predicting the missing scales in the databases</h2>
+<p align="justify">
+The <strong>OTrecod</strong> package proposes actually two algorithms using optimal transportation theory (see (3) for details) to solve the recoding problem previously introduced. Each algorithm is stored in a unique function called <strong>OT_outcome</strong> and <strong>OT_joint</strong>. These two functions can predict the missing values of <em>c.neti</em> in <em>data2</em>, the missing values of <em>c.neti.bis</em> in <em>data1</em> or the both using a same argument called <em>which.DB</em>.
+</p>
+<p align="justify">
+As with the <strong>select_pred</strong> function, it is possible to transform directly the continuous matching variables if necessary using the <em>convert_num</em> and <em>convert_clss</em> arguments.
+</p>
+<p>Let see the R approach for the prediction of <em>c.neti.bis</em> in <em>data1</em>.</p>
+<p> </p>
+<div id="a-transporting-target-variables-to-predict-the-missing-scales" class="section level3">
+<h3>A) Transporting target variables to predict the missing scales</h3>
+<p align="justify">
+The algorithm from <strong>OT_outcome</strong> function solves an optimization problem to transfer the distributions of the target variables (or outcome) from one database to another. Using this result, the initial version of the algorithm (see (2)) transfers the distribution of <em>c.neti.bis</em> in <em>data2</em> to the distribution of <em>c.neti.bis</em> in <em>data1</em>, and (inversely for <em>c.neti</em> if necessary). The algorithm executes in another distinct step, a nearest neighbor procedure to affect the indidividual predictions of <em>c.neti.bis</em> in <em>data1</em>. This version of the algorithm is actually available by writing <em>sequential</em> as argument <em>method</em> of the <strong>OT_outcome</strong> function.
+</p>
+<p align="justify">
+The algorithm assumes the strong hypothesis that the variable <em>c.neti.bis</em> has the same distribution in <em>data1</em> and <em>data2</em> (and so on for the variable <em>c.neti</em>). If in this example, by construction, this hypothesis is obviously verified, there are also several contexts where this latter no longer holds.
+</p>
+<p align="justify">
+Enrichments have been thus proposed (see (2)) to relax this hypothesis via the <em>maxrelax</em> argument of <strong>OT_outcome</strong> and directly provides the individual predictions without using the nearest neighbor process. This algorithm is actually available by assigning the <em>method</em> argument to <em>optimal</em> in input of the <strong>OT_outcome</strong> function. For our example, the corresponding R code for the prediction of <em>c.neti.bis</em> in <em>data1</em> is:
+</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co"># sequential algorithm</span></a>
+<a class="sourceLine" id="cb13-2" title="2">mod1_seq =<span class="st"> </span><span class="kw">OT_outcome</span>(match_var, <span class="dt">nominal =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span><span class="op">:</span><span class="dv">6</span>), <span class="dt">ordinal =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">4</span>, <span class="dt">dist.choice =</span> <span class="st">&quot;E&quot;</span>,</a>
+<a class="sourceLine" id="cb13-3" title="3">                      <span class="dt">maxrelax =</span> <span class="dv">0</span> , <span class="dt">indiv.method =</span> <span class="st">&quot;sequential&quot;</span>, <span class="dt">which.DB =</span> <span class="st">&quot;A&quot;</span>)</a>
+<a class="sourceLine" id="cb13-4" title="4"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb13-5" title="5"><span class="co">#&gt; OT PROCEDURE in progress ...</span></a>
+<a class="sourceLine" id="cb13-6" title="6"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb13-7" title="7"><span class="co">#&gt; Type                     = OUTCOME</span></a>
+<a class="sourceLine" id="cb13-8" title="8"><span class="co">#&gt; Distance                 = Euclidean</span></a>
+<a class="sourceLine" id="cb13-9" title="9"><span class="co">#&gt; Percent closest knn      = 100%</span></a>
+<a class="sourceLine" id="cb13-10" title="10"><span class="co">#&gt; Relaxation parameter     = NO</span></a>
+<a class="sourceLine" id="cb13-11" title="11"><span class="co">#&gt; Relaxation value         = 0</span></a>
+<a class="sourceLine" id="cb13-12" title="12"><span class="co">#&gt; Individual pred process  = Sequential</span></a>
+<a class="sourceLine" id="cb13-13" title="13"><span class="co">#&gt; DB imputed               = A</span></a>
+<a class="sourceLine" id="cb13-14" title="14"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb13-15" title="15"><span class="kw">summary</span>(mod1_seq)</a>
+<a class="sourceLine" id="cb13-16" title="16"><span class="co">#&gt;             Length Class      Mode   </span></a>
+<a class="sourceLine" id="cb13-17" title="17"><span class="co">#&gt; time_exe      1    difftime   numeric</span></a>
+<a class="sourceLine" id="cb13-18" title="18"><span class="co">#&gt; gamma_A      28    -none-     numeric</span></a>
+<a class="sourceLine" id="cb13-19" title="19"><span class="co">#&gt; gamma_B      28    -none-     numeric</span></a>
+<a class="sourceLine" id="cb13-20" title="20"><span class="co">#&gt; profile       5    data.frame list   </span></a>
+<a class="sourceLine" id="cb13-21" title="21"><span class="co">#&gt; res_prox     16    -none-     list   </span></a>
+<a class="sourceLine" id="cb13-22" title="22"><span class="co">#&gt; estimatorZA 812    -none-     numeric</span></a>
+<a class="sourceLine" id="cb13-23" title="23"><span class="co">#&gt; estimatorYB   0    -none-     NULL   </span></a>
+<a class="sourceLine" id="cb13-24" title="24"><span class="co">#&gt; DATA1_OT      8    data.frame list   </span></a>
+<a class="sourceLine" id="cb13-25" title="25"><span class="co">#&gt; DATA2_OT      7    data.frame list</span></a>
+<a class="sourceLine" id="cb13-26" title="26"></a>
+<a class="sourceLine" id="cb13-27" title="27"><span class="co"># optimal algorithm with no relaxation term</span></a>
+<a class="sourceLine" id="cb13-28" title="28">mod2_opt =<span class="st"> </span><span class="kw">OT_outcome</span>(match_var, <span class="dt">nominal =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span><span class="op">:</span><span class="dv">6</span>), <span class="dt">ordinal =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">4</span>, <span class="dt">dist.choice =</span> <span class="st">&quot;E&quot;</span>,</a>
+<a class="sourceLine" id="cb13-29" title="29">                      <span class="dt">maxrelax =</span> <span class="dv">0</span>, <span class="dt">indiv.method =</span> <span class="st">&quot;optimal&quot;</span>, <span class="dt">which.DB =</span> <span class="st">&quot;A&quot;</span>)</a>
+<a class="sourceLine" id="cb13-30" title="30"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb13-31" title="31"><span class="co">#&gt; OT PROCEDURE in progress ...</span></a>
+<a class="sourceLine" id="cb13-32" title="32"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb13-33" title="33"><span class="co">#&gt; Type                     = R-OUTCOME</span></a>
+<a class="sourceLine" id="cb13-34" title="34"><span class="co">#&gt; Distance                 = Euclidean</span></a>
+<a class="sourceLine" id="cb13-35" title="35"><span class="co">#&gt; Percent closest knn      = 100%</span></a>
+<a class="sourceLine" id="cb13-36" title="36"><span class="co">#&gt; Relaxation parameter     = NO</span></a>
+<a class="sourceLine" id="cb13-37" title="37"><span class="co">#&gt; Relaxation value         = 0</span></a>
+<a class="sourceLine" id="cb13-38" title="38"><span class="co">#&gt; Individual pred process  = Optimal</span></a>
+<a class="sourceLine" id="cb13-39" title="39"><span class="co">#&gt; DB imputed               = A</span></a>
+<a class="sourceLine" id="cb13-40" title="40"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb13-41" title="41"><span class="kw">head</span>(mod2_opt<span class="op">$</span>profile)</a>
+<a class="sourceLine" id="cb13-42" title="42"><span class="co">#&gt;        ID sex_2 urb_2 urb_3 hsize5</span></a>
+<a class="sourceLine" id="cb13-43" title="43"><span class="co">#&gt; 21384 P_1     1     0     0      1</span></a>
+<a class="sourceLine" id="cb13-44" title="44"><span class="co">#&gt; 35973 P_2     0     0     0      2</span></a>
+<a class="sourceLine" id="cb13-45" title="45"><span class="co">#&gt; 11774 P_3     0     1     0      1</span></a>
+<a class="sourceLine" id="cb13-46" title="46"><span class="co">#&gt; 6301  P_4     0     1     0      5</span></a>
+<a class="sourceLine" id="cb13-47" title="47"><span class="co">#&gt; 12990 P_5     1     1     0      2</span></a>
+<a class="sourceLine" id="cb13-48" title="48"><span class="co">#&gt; 39835 P_6     1     1     0      4</span></a>
+<a class="sourceLine" id="cb13-49" title="49"></a>
+<a class="sourceLine" id="cb13-50" title="50"><span class="kw">dim</span>(mod2_opt<span class="op">$</span>profile)</a>
+<a class="sourceLine" id="cb13-51" title="51"><span class="co">#&gt; [1] 29  5</span></a>
+<a class="sourceLine" id="cb13-52" title="52"></a>
+<a class="sourceLine" id="cb13-53" title="53">mod2_opt<span class="op">$</span>gamma_A</a>
+<a class="sourceLine" id="cb13-54" title="54"><span class="co">#&gt;       [,1]  [,2]       [,3]        [,4]</span></a>
+<a class="sourceLine" id="cb13-55" title="55"><span class="co">#&gt; [1,] 0.185 0.000 0.00000000 0.000000000</span></a>
+<a class="sourceLine" id="cb13-56" title="56"><span class="co">#&gt; [2,] 0.200 0.000 0.00000000 0.000000000</span></a>
+<a class="sourceLine" id="cb13-57" title="57"><span class="co">#&gt; [3,] 0.015 0.155 0.00000000 0.000000000</span></a>
+<a class="sourceLine" id="cb13-58" title="58"><span class="co">#&gt; [4,] 0.000 0.225 0.02000000 0.000000000</span></a>
+<a class="sourceLine" id="cb13-59" title="59"><span class="co">#&gt; [5,] 0.000 0.000 0.09000000 0.000000000</span></a>
+<a class="sourceLine" id="cb13-60" title="60"><span class="co">#&gt; [6,] 0.000 0.000 0.06333333 0.001666667</span></a>
+<a class="sourceLine" id="cb13-61" title="61"><span class="co">#&gt; [7,] 0.000 0.000 0.00000000 0.045000000</span></a>
+<a class="sourceLine" id="cb13-62" title="62"></a>
+<a class="sourceLine" id="cb13-63" title="63"><span class="kw">head</span>(mod2_opt<span class="op">$</span>DATA1_OT)</a>
+<a class="sourceLine" id="cb13-64" title="64"><span class="co">#&gt;       DB        Y    Z sex_2 urb_2 urb_3 hsize5 OTpred</span></a>
+<a class="sourceLine" id="cb13-65" title="65"><span class="co">#&gt; 21384  1   (0,10] &lt;NA&gt;     1     0     0      1      1</span></a>
+<a class="sourceLine" id="cb13-66" title="66"><span class="co">#&gt; 35973  1  (10,15] &lt;NA&gt;     0     0     0      2      2</span></a>
+<a class="sourceLine" id="cb13-67" title="67"><span class="co">#&gt; 11774  1  (15,20] &lt;NA&gt;     0     1     0      1      2</span></a>
+<a class="sourceLine" id="cb13-68" title="68"><span class="co">#&gt; 32127  1  (10,15] &lt;NA&gt;     0     0     0      2      2</span></a>
+<a class="sourceLine" id="cb13-69" title="69"><span class="co">#&gt; 6301   1 (-Inf,0] &lt;NA&gt;     0     1     0      5      1</span></a>
+<a class="sourceLine" id="cb13-70" title="70"><span class="co">#&gt; 12990  1 (-Inf,0] &lt;NA&gt;     1     1     0      2      1</span></a></code></pre></div>
+<p>As input:</p>
+<ul>
+<li>The target <em>c.neti.bis</em> is here considered as an ordinal scale but sometimes this information can be unknown: In the situation where there is no information about the encoding, is recommended to consider it as nominal.</li>
+<li>There is many possible distance functions integrated in <strong>OT_outcome</strong> to evaluate the distances between individuals: Here, the Euclidean distance have been chosen.</li>
+<li>The <em>percent.knn</em> argument corresponds to the fixed part (from 0 to 1) of individuals that participate to the computations of average distances between levels of target variables.</li>
+</ul>
+<p>In output, these two models provides lists of same structure:</p>
+<ul>
+<li><em>gamma_A</em> stores the solution of the optimization problem to determine the missing scales of <em>c.neti.bis</em> in <em>data1</em>.</li>
+<li>The <em>profile</em> object gives the profiles of covariates detected by the algorithm from the two databases: Here we have 29 profiles.</li>
+<li><em>estimatorZA</em> is an array that provides for each profile, the probability for <em>c.neti.bis</em> to belong to a level given the covariates and the corresponding level of <em>c.neti</em>.</li>
+<li>The <em>DATA1_OT</em> object provides the individual predictions of <em>c.neti.bis</em> in <em>data1</em> (variable <em>OTpred</em> of the data.frame).</li>
+</ul>
+<p> </p>
+</div>
+<div id="b-transporting-target-and-shared-variables-to-predict-the-missing-scales" class="section level3">
+<h3>B) Transporting target and shared variables to predict the missing scales</h3>
+<p align="justify">
+The objective of the algorithm integrated in the <strong>OT_joint</strong> function is the same as that of the <strong>OT_outcome</strong> function, but unlike <strong>OT_outcome</strong> transfers only the distributions of the target variables to solve the optimization problem, the <strong>OT_joint</strong> function now transports the joint distribution of outcomes and covariates: This approach makes it possible to no longer assumes the strong distributional hypothesis mentionned previously.
+</p>
+<p align="justify">
+Nevertheless, as with the <strong>OT_outcome</strong> function, enrichments have been proposed to relax distributional constraints (see <em>maxrelax</em> argument and (2)) and eventually adds to the algorithm a regularization term to smooth the variations of target variables with respect to matching variables (see <em>lambda.reg</em> arguments).
+</p>
+<p align="justify">
+<p>To guarantee the convergence of the algorithm:</p>
+<ul>
+<li>It is suggested to work with a limited number of matching variables and so to select them rigorously using <em>select_pred</em> or another process of selection.</li>
+<li>Choosing a small value of the <em>prox.X</em> argument improves the convergence and the running time of the function.</li>
+</ul>
+For our example, the corresponding R code for the prediction of <em>c.neti.bis</em> in <em>data1</em> is:
+</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="co"># Algorithms with no enrichments</span></a>
+<a class="sourceLine" id="cb14-2" title="2">mod3_joint =<span class="st"> </span><span class="kw">OT_joint</span>(match_var, <span class="dt">nominal =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">5</span>), <span class="dt">ordinal =</span> <span class="kw">c</span>(<span class="dv">2</span><span class="op">:</span><span class="dv">4</span>,<span class="dv">6</span>), <span class="dt">dist.choice =</span> <span class="st">&quot;E&quot;</span>, <span class="dt">which.DB =</span> <span class="st">&quot;A&quot;</span>)</a>
+<a class="sourceLine" id="cb14-3" title="3"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="co">#&gt; OT JOINT PROCEDURE in progress ...</span></a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="co">#&gt; Type                  = JOINT</span></a>
+<a class="sourceLine" id="cb14-7" title="7"><span class="co">#&gt; Distance              = Euclidean</span></a>
+<a class="sourceLine" id="cb14-8" title="8"><span class="co">#&gt; Percent closest       = 100%</span></a>
+<a class="sourceLine" id="cb14-9" title="9"><span class="co">#&gt; Relaxation term       = 0</span></a>
+<a class="sourceLine" id="cb14-10" title="10"><span class="co">#&gt; Regularization term   = 0</span></a>
+<a class="sourceLine" id="cb14-11" title="11"><span class="co">#&gt; Aggregation tol cov   = 0.1</span></a>
+<a class="sourceLine" id="cb14-12" title="12"><span class="co">#&gt; DB imputed            = A</span></a>
+<a class="sourceLine" id="cb14-13" title="13"><span class="co">#&gt; ---------------------------------------</span></a>
+<a class="sourceLine" id="cb14-14" title="14"><span class="kw">summary</span>(mod3_joint)</a>
+<a class="sourceLine" id="cb14-15" title="15"><span class="co">#&gt;             Length Class      Mode   </span></a>
+<a class="sourceLine" id="cb14-16" title="16"><span class="co">#&gt; time_exe      1    difftime   numeric</span></a>
+<a class="sourceLine" id="cb14-17" title="17"><span class="co">#&gt; gamma_A      28    -none-     numeric</span></a>
+<a class="sourceLine" id="cb14-18" title="18"><span class="co">#&gt; gamma_B       0    -none-     NULL   </span></a>
+<a class="sourceLine" id="cb14-19" title="19"><span class="co">#&gt; profile       4    data.frame list   </span></a>
+<a class="sourceLine" id="cb14-20" title="20"><span class="co">#&gt; res_prox     16    -none-     list   </span></a>
+<a class="sourceLine" id="cb14-21" title="21"><span class="co">#&gt; estimatorZA 812    -none-     numeric</span></a>
+<a class="sourceLine" id="cb14-22" title="22"><span class="co">#&gt; estimatorYB   0    -none-     NULL   </span></a>
+<a class="sourceLine" id="cb14-23" title="23"><span class="co">#&gt; DATA1_OT      7    data.frame list   </span></a>
+<a class="sourceLine" id="cb14-24" title="24"><span class="co">#&gt; DATA2_OT      6    data.frame list</span></a></code></pre></div>
+<p align="justify">
+For a better understanding, the input arguments and output objects of the <strong>OT_joint</strong> function have been thought to be similar to those proposed by the <strong>OT_outcome</strong> function. As previously, the <em>OTpred</em> variable of the <em>DATA1_OT</em> object stores the individual predictions of <em>c.neti.bis</em> in <em>data1</em>.
+</p>
+<p> </p>
+</div>
+</div>
+<div id="v.-validation-of-the-individual-predictions" class="section level2">
+<h2>V. Validation of the individual predictions</h2>
+<p align="justify">
+The <strong>verif_OT</strong> function gives access to different tools for assessing the reliability of the individual predictions proposed by the <strong>OT_outcome</strong> and <strong>OT_joint</strong> functions.
+</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="co"># Validation of the mod1_seq model</span></a>
+<a class="sourceLine" id="cb15-2" title="2">verif_out1 =<span class="st"> </span><span class="kw">verif_OT</span>(mod1_seq, <span class="dt">stab.prob =</span> <span class="ot">TRUE</span>, <span class="dt">min.neigb =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb15-3" title="3">verif_out1<span class="op">$</span>conf.mat</a>
+<a class="sourceLine" id="cb15-4" title="4"><span class="co">#&gt;            predZ</span></a>
+<a class="sourceLine" id="cb15-5" title="5"><span class="co">#&gt; Y             1   2   3   4 Sum</span></a>
+<a class="sourceLine" id="cb15-6" title="6"><span class="co">#&gt;   (-Inf,0]   37   0   0   0  37</span></a>
+<a class="sourceLine" id="cb15-7" title="7"><span class="co">#&gt;   (0,10]     40   0   0   0  40</span></a>
+<a class="sourceLine" id="cb15-8" title="8"><span class="co">#&gt;   (10,15]     3  31   0   0  34</span></a>
+<a class="sourceLine" id="cb15-9" title="9"><span class="co">#&gt;   (15,20]     1  45   3   0  49</span></a>
+<a class="sourceLine" id="cb15-10" title="10"><span class="co">#&gt;   (20,25]     1   1  16   0  18</span></a>
+<a class="sourceLine" id="cb15-11" title="11"><span class="co">#&gt;   (25,35]     1   1  11   0  13</span></a>
+<a class="sourceLine" id="cb15-12" title="12"><span class="co">#&gt;   (35, Inf]   1   1   1   6   9</span></a>
+<a class="sourceLine" id="cb15-13" title="13"><span class="co">#&gt;   Sum        84  79  31   6 200</span></a>
+<a class="sourceLine" id="cb15-14" title="14"></a>
+<a class="sourceLine" id="cb15-15" title="15">verif_out1<span class="op">$</span>res.prox</a>
+<a class="sourceLine" id="cb15-16" title="16"><span class="co">#&gt;        N   V_cram rank_cor </span></a>
+<a class="sourceLine" id="cb15-17" title="17"><span class="co">#&gt;  200.000    0.860    0.871</span></a>
+<a class="sourceLine" id="cb15-18" title="18"></a>
+<a class="sourceLine" id="cb15-19" title="19">verif_out1<span class="op">$</span>res.stab</a>
+<a class="sourceLine" id="cb15-20" title="20"><span class="co">#&gt;          N min.N  R  mean    sd</span></a>
+<a class="sourceLine" id="cb15-21" title="21"><span class="co">#&gt; 1st DB 200     3 10 0.862 0.147</span></a>
+<a class="sourceLine" id="cb15-22" title="22"></a>
+<a class="sourceLine" id="cb15-23" title="23"></a>
+<a class="sourceLine" id="cb15-24" title="24"><span class="co"># Validation of the mod2_seq model</span></a>
+<a class="sourceLine" id="cb15-25" title="25">verif_out2 =<span class="st"> </span><span class="kw">verif_OT</span>(mod2_opt, <span class="dt">stab.prob =</span> <span class="ot">TRUE</span>, <span class="dt">min.neigb =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb15-26" title="26">verif_out2<span class="op">$</span>conf.mat</a>
+<a class="sourceLine" id="cb15-27" title="27"><span class="co">#&gt;            predZ</span></a>
+<a class="sourceLine" id="cb15-28" title="28"><span class="co">#&gt; Y             1   2   3   4 Sum</span></a>
+<a class="sourceLine" id="cb15-29" title="29"><span class="co">#&gt;   (-Inf,0]   37   0   0   0  37</span></a>
+<a class="sourceLine" id="cb15-30" title="30"><span class="co">#&gt;   (0,10]     40   0   0   0  40</span></a>
+<a class="sourceLine" id="cb15-31" title="31"><span class="co">#&gt;   (10,15]     3  31   0   0  34</span></a>
+<a class="sourceLine" id="cb15-32" title="32"><span class="co">#&gt;   (15,20]     0  45   4   0  49</span></a>
+<a class="sourceLine" id="cb15-33" title="33"><span class="co">#&gt;   (20,25]     0   0  18   0  18</span></a>
+<a class="sourceLine" id="cb15-34" title="34"><span class="co">#&gt;   (25,35]     0   0  13   0  13</span></a>
+<a class="sourceLine" id="cb15-35" title="35"><span class="co">#&gt;   (35, Inf]   0   0   0   9   9</span></a>
+<a class="sourceLine" id="cb15-36" title="36"><span class="co">#&gt;   Sum        80  76  35   9 200</span></a>
+<a class="sourceLine" id="cb15-37" title="37">rate_good_pred =<span class="st"> </span>(<span class="dv">37</span><span class="op">+</span><span class="dv">40</span><span class="op">+</span><span class="dv">31</span><span class="op">+</span><span class="dv">45</span><span class="op">+</span><span class="dv">18</span><span class="op">+</span><span class="dv">13</span><span class="op">+</span><span class="dv">9</span>)<span class="op">/</span><span class="dv">200</span></a>
+<a class="sourceLine" id="cb15-38" title="38">rate_good_pred</a>
+<a class="sourceLine" id="cb15-39" title="39"><span class="co">#&gt; [1] 0.965</span></a>
+<a class="sourceLine" id="cb15-40" title="40"></a>
+<a class="sourceLine" id="cb15-41" title="41">verif_out2<span class="op">$</span>res.prox</a>
+<a class="sourceLine" id="cb15-42" title="42"><span class="co">#&gt;        N   V_cram rank_cor </span></a>
+<a class="sourceLine" id="cb15-43" title="43"><span class="co">#&gt;  200.000    0.960    0.939</span></a>
+<a class="sourceLine" id="cb15-44" title="44"></a>
+<a class="sourceLine" id="cb15-45" title="45">verif_out2<span class="op">$</span>res.stab</a>
+<a class="sourceLine" id="cb15-46" title="46"><span class="co">#&gt;          N min.N  R mean    sd</span></a>
+<a class="sourceLine" id="cb15-47" title="47"><span class="co">#&gt; 1st DB 200     3 10 0.93 0.109</span></a>
+<a class="sourceLine" id="cb15-48" title="48"></a>
+<a class="sourceLine" id="cb15-49" title="49"></a>
+<a class="sourceLine" id="cb15-50" title="50"><span class="co"># Validation of the mod3_opt model</span></a>
+<a class="sourceLine" id="cb15-51" title="51">verif_jt   =<span class="st"> </span><span class="kw">verif_OT</span>(mod3_joint, <span class="dt">stab.prob =</span> <span class="ot">TRUE</span>, <span class="dt">min.neigb =</span> <span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb15-52" title="52">verif_jt<span class="op">$</span>conf.mat</a>
+<a class="sourceLine" id="cb15-53" title="53"><span class="co">#&gt;            predZ</span></a>
+<a class="sourceLine" id="cb15-54" title="54"><span class="co">#&gt; Y             1   2   3   4 Sum</span></a>
+<a class="sourceLine" id="cb15-55" title="55"><span class="co">#&gt;   (-Inf,0]   33   4   0   0  37</span></a>
+<a class="sourceLine" id="cb15-56" title="56"><span class="co">#&gt;   (0,10]     32   8   0   0  40</span></a>
+<a class="sourceLine" id="cb15-57" title="57"><span class="co">#&gt;   (10,15]     4  29   1   0  34</span></a>
+<a class="sourceLine" id="cb15-58" title="58"><span class="co">#&gt;   (15,20]    11  19  19   0  49</span></a>
+<a class="sourceLine" id="cb15-59" title="59"><span class="co">#&gt;   (20,25]     0  10   5   3  18</span></a>
+<a class="sourceLine" id="cb15-60" title="60"><span class="co">#&gt;   (25,35]     1   2  10   0  13</span></a>
+<a class="sourceLine" id="cb15-61" title="61"><span class="co">#&gt;   (35, Inf]   6   1   0   2   9</span></a>
+<a class="sourceLine" id="cb15-62" title="62"><span class="co">#&gt;   Sum        87  73  35   5 200</span></a>
+<a class="sourceLine" id="cb15-63" title="63"></a>
+<a class="sourceLine" id="cb15-64" title="64">verif_jt<span class="op">$</span>res.prox</a>
+<a class="sourceLine" id="cb15-65" title="65"><span class="co">#&gt;        N   V_cram rank_cor </span></a>
+<a class="sourceLine" id="cb15-66" title="66"><span class="co">#&gt;  200.000    0.550    0.613</span></a>
+<a class="sourceLine" id="cb15-67" title="67"></a>
+<a class="sourceLine" id="cb15-68" title="68">verif_jt<span class="op">$</span>res.stab</a>
+<a class="sourceLine" id="cb15-69" title="69"><span class="co">#&gt;          N min.N  R  mean    sd</span></a>
+<a class="sourceLine" id="cb15-70" title="70"><span class="co">#&gt; 1st DB 112     3 10 0.904 0.117</span></a></code></pre></div>
+<p align="justify">
+<p>As input:</p>
+<ul>
+<li>When the <em>stab.prob</em> argument is set to <em>TRUE</em>, the function provides information about the average stability of the individual predictions.</li>
+<li>The <em>min.neigb</em> argument specifies that individuals whose probabilities of assignments have been estimated using less than 3 neighbors are dropped from this average (see the documentation of the function for more details).
+</p></li>
+</ul>
+<p align="justify">
+<p>As output, we have selected the most interesting one to make the comparison between the three tested models:</p>
+<ul>
+<li>The <em>conf.mat</em> object provides the confusion matrix between <em>c.neti</em> and the individual predictions of <em>c.neti.bis</em> in <em>data1</em>. Here the two target variables <em>c.neti</em> and <em>c.neti.bis</em> are supposed to summarize a same information, so if the two scales are ordered, a clear structure in the confusion matrix traduces a good logical in the prediction. In our example, by construction, we also know the real encoding of <em>c.neti.bis</em>: We can so easily verify that the rate of good predictions equals 0.965 for the <em>mod2_opt</em> model, 0.93 for the <em>mod1_seq</em> model and 0.635 for the <em>mod3_jt</em> model.</li>
+<li>Studying the proximity between the distributions of <em>c.neti</em> and <em>c.neti.bis</em> in <em>data1</em> via the V Cramer criterion (see <em>res.prox</em> object) confirms that the <em>mod2_opt</em> model is the more adapted for our example.</li>
+<li>Finally, studying the stability of the predictions (see <em>res.stab</em> object) shows good results whatever the considered model.
+</p></li>
+</ul>
+<strong>CONCLUSION</strong>
+<p align="justify">
+<strong>The two first models are here more adapted when the strong distributional hypothesis previously introduced holds.</strong> <strong>Nevertheless, the mod3_jt model could be significantly improved by adding appropriate relaxation and regularization terms, so now, R user,</strong> <strong>test it by yourself !</strong>
+</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ol style="list-style-type: decimal">
+<li><p>Gares V, Dimeglio C, Guernec G, Fantin F, Lepage B, Korosok MR, savy N (2019). On the use of optimal transportation theory to recode variables and application to database merging. The International Journal of Biostatistics.Volume 16, Issue 1, 20180106, eISSN 1557-4679.</p></li>
+<li><p>Gares V, Omer J (2020). Regularized optimal transport of covariates and outcomes in data recoding. Journal of the American Statistical Association.</p></li>
+<li><p>D’Orazio, M (2015). Integration and imputation of survey data in R: the StatMatch package. Romanian Statistical Review, vol. 63(2), pages 57-68</p></li>
+<li><p>Strobl C, Boulesteix A-L, Kneib T, Augustin T, Zeileis A (2008). Conditional Variable Importance for Random Forests. BMC Bioinformatics, 9, 307 - <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-307" class="uri">https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-307</a></p></li>
+</ol>
+<p> </p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
