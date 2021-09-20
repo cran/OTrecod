@@ -210,55 +210,45 @@ merge_dbs = function(DB1,
   if ((!is.data.frame(DB1)) | (!is.data.frame(DB2))) {
     stop("At least one of your two objects is not a data.frame!")
 
-  } else {
-  }
+  } else {}
 
 
   if ((is.character(NAME_Y) != TRUE) |
       (is.character(NAME_Z) != TRUE)) {
     stop ("NAME_Y and NAME_Z must be declared as strings of characters with quotes")
 
-  } else {
-  }
+  } else {}
 
 
   if ((length(NAME_Y) != 1) | (length(NAME_Z) != 1)) {
     stop ("No or more than one target declared by DB !")
 
-  } else {
-  }
+  } else {}
 
   if ((is.null(levels(DB1[, NAME_Y])))|(is.null(levels(DB2[, NAME_Z])))){
 
     stop ("Your target variable must be a factor in the 2 databases")
 
-  } else{
-  }
+  } else {}
 
 
   if ((!(is.numeric(R_MICE)))|(!(is.numeric(NCP_FAMD)))){
 
     stop ("The options R_MICE and NCP_FAMD must contain numeric values")
 
-  } else {
-
-  }
+  } else {}
 
   if (!(impute %in% c("CC","FAMD","MICE","NO"))){
 
     stop("Invalid character in the impute option: You must choose between NO, FAMD, CC and MICE")
 
-  } else {
-
-  }
+  } else {}
 
   if ((length(ordinal_DB1)>ncol(DB1))|(length(ordinal_DB2)>ncol(DB2))){
 
     stop("The number of column indexes exceeds the number of columns of your DB")
 
-  } else {
-
-  }
+  } else {}
 
 
   # Remove subjects in DB1 (resp. DB2) with Y (resp.Z) missing
@@ -505,17 +495,17 @@ merge_dbs = function(DB1,
   message("\n")
   message("SUMMARY OF DBS MERGING:", "\n")
   message(
-    "Nb of removed subjects because of NA on targets: ",
+    "Nb of removed subjects due to NA on targets: ",
     REMOVE_SUBJECT1 + REMOVE_SUBJECT2,
     "(",
     round((REMOVE_SUBJECT1 + REMOVE_SUBJECT2) * 100 / (NB1_1 + NB2_1)),
     "%)",
     "\n"
   )
-  message("Nb of covariates removed because of differences between the 2 bases: ",
+  message("Nb of removed covariates due to differences between the 2 bases: ",
       length(remove_var),
       "\n")
-  message("Nb of covariates remained: ", ncol(DB_COV) - 3, "\n")
+  message("Nb of remained covariates: ", ncol(DB_COV) - 3, "\n")
   message("Imputation on incomplete covariates: ",impute,"\n")
 
   if (impute %in% c("NO", "CC", "FAMD")) {

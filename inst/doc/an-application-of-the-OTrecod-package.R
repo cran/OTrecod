@@ -10,6 +10,10 @@ knitr::opts_chunk$set(
 ## ----results='hide',message=FALSE,warning=FALSE-------------------------------
 library(OTrecod)
 
+## ----eval=FALSE---------------------------------------------------------------
+#  # Install development version from GitHub
+#  devtools::install_github("otrecoding/OTrecod")
+
 ## ----results='hide',message=FALSE,warning=FALSE-------------------------------
 library(StatMatch)
 data(samp.A)
