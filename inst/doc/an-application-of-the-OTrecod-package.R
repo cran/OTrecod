@@ -65,14 +65,14 @@ db_test$DB_READY[c(1:5,201:205),]   # The 5 1st subjects of the two databases
 # for data1
 test_DB1 = select_pred(db_test$DB_READY,Y = "Y", Z = "Z", ID = 1, OUT = "Y",
                        quanti = 8, nominal = c(1,5:6,7), ordinal = c(2:4),
-                       convert_num = 8, convert_clss = 4,
+                       convert_num = 8, convert_class = 4,
                        thresh_cat = 0.30, thresh_num = 0.70, thresh_Y = 0.10,
                        RF = TRUE, RF_SEED = 3017)
 
 # for data2
 test_DB2 = select_pred(db_test$DB_READY,Y = "Y", Z = "Z", ID = 1, OUT = "Z",
                        quanti = 8, nominal = c(1,5:6,7), ordinal = c(2:4),
-                       convert_num = 8, convert_clss = 4,
+                       convert_num = 8, convert_class = 4,
                        thresh_cat = 0.30, thresh_num = 0.70, thresh_Y = 0.10,
                        RF = TRUE, RF_SEED = 3017)
 
@@ -122,9 +122,10 @@ mod2_opt$gamma_A
 head(mod2_opt$DATA1_OT)
 
 
-## -----------------------------------------------------------------------------
+## ----joint--------------------------------------------------------------------
 # Algorithms with no enrichments
-mod3_joint = OT_joint(match_var, nominal = c(1,5), ordinal = c(2:4,6), dist.choice = "E", which.DB = "A")
+mod3_joint = OT_joint(match_var, nominal = c(1,5), ordinal = c(2:4,6), dist.choice = "E", 
+                      prox.X = 0.10, which.DB = "A")
 summary(mod3_joint)
 
 ## -----------------------------------------------------------------------------

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>application-on-real-data-with-na</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">application-on-real-data-with-na</h1>
+
+
+
+<div id="the-ncds-project" class="section level3">
+<h3>The NCDS project</h3>
+<p> </p>
+<p align="justify">
+The National Child Development Study project also called NCDS project
+(<a href="https://cls.ucl.ac.uk/cls-studies/1958-national-child-development-study/" class="uri">https://cls.ucl.ac.uk/cls-studies/1958-national-child-development-study/</a>)
+is a continuing survey which follows the lives of over 17,000 people
+born in England, Scotland and Wales in a same week of the year 1958.
+</p>
+<p align="justify">
+The project is well-known today because its results have greatly
+contributed to improve the quality of maternity services in UK.
+</p>
+<p align="justify">
+This survey collects specific information on many distinct fields like
+physical and educational development, economic circumstances,
+employment, family life, health behaviour, well-being, social
+participation and attitudes.
+</p>
+<p> </p>
+</div>
+<div id="the-problem" class="section level3">
+<h3>The problem</h3>
+<p> </p>
+<p align="justify">
+Two possible measurements scales of the social class of the participants
+built from profession can have been collected at each updates of data
+collection.
+</p>
+<p align="justify">
+The first one corresponds to the <strong>Goldthorp Social Class
+90</strong> scale (<strong>GO90</strong>), a scale with 12 categories,
+while the second one corresponds to the <strong>RG Social Class
+91</strong> scale (<strong>RG91</strong>), a scale with only 7
+categories respectively described in the documentation of the
+<em>ncds_14</em> and <em>ncds_5</em> databases.
+</p>
+<p align="justify">
+If during the first survey waves, the information related to the social
+level of each participant is collected using the <strong>GO90</strong>
+scale, it is the <strong>RG91</strong> scale that was used exclusively
+from wave 5. This variation in data collection could pose a problem
+related to the exploitation of this variable, when including new
+participants in cohort studies, especially because there is actually no
+overlaps bethween the two databases.
+</p>
+<p><strong>Question: how to work with the greatest number of
+participants encountered in the study without losing the information
+related to the individual social level?</strong></p>
+<p>Answer: We will see in this vignette how the use of the
+<strong>OTrecod</strong> functions can provide a concrete answer to this
+question.</p>
+<p> </p>
+</div>
+<div id="the-solution" class="section level3">
+<h3>The solution</h3>
+<p> </p>
+<p align="justify">
+Functions from the <strong>OTrecod</strong> package can help users to
+solve the problem introduced in the previous section by recoding the
+missing scale <strong>GO90</strong> or/and <strong>RG91</strong> in the
+corresponding databases as described in the following paragraphs
+dedicated to the imputation of <strong>GO90</strong> in <em>ncds_5</em>.
+However, it would be obvioulsy possible to impute <strong>RG91</strong>
+in <em>ncds_14</em> or both in a similar process.
+</p>
+<p> </p>
+</div>
+<div id="package-installation" class="section level3">
+<h3>Package installation</h3>
+<p> </p>
+<p>If the package <strong>OTrecod</strong> is not installed in their
+current R versions, users can install it by following the standard
+instruction:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;OTrecod&quot;</span>)</span></code></pre></div>
+<p>Each time an R session is opened, the <strong>OTrecod</strong>
+library must be loaded with:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(OTrecod)</span></code></pre></div>
+<p>Moreover, the development version of <strong>OTrecod</strong> can be
+installed actually from <a href="https://github.com/otrecoding/OTrecod">GitHub</a> with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install development version from GitHub</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;otrecoding/OTrecod&quot;</span>)</span></code></pre></div>
+<p> </p>
+</div>
+<div id="databases-installation" class="section level3">
+<h3>databases installation</h3>
+<p> </p>
+<p align="justify">
+Participants from waves 1 to 4 were stored in a database called
+<em>ncds_14</em> provided in the <strong>OTrecod</strong> package. In
+the same way, informations related to new participants included in the
+study from the wave 5 were stored in the <em>ncds_5</em> database. These
+two base are available in <strong>OTrecod</strong> and can be simply
+loaded as follows:
+</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load(&quot;C:\\Users\\secr\\Desktop\\newpack\\datas_vignet2.RData&quot;)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(ncds_14); <span class="fu">data</span>(ncds_5)</span></code></pre></div>
+<p>Here is the description of all the variables contained in each of the
+databases:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ncds_14); <span class="fu">summary</span>(ncds_5)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ncdsid               GO90      health         employ      gender    </span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Length:5476        20     :876   1   :1596   1      :1436   1   :2262  </span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Class :character   71     :840   2   :2429   7      :1250   2   :2408  </span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Mode  :character   10     :766   3   : 516   4      : 777   NA&#39;s: 806  </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     31     :727   4   :  72   3      : 431              </span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     60     :509   NA&#39;s: 863   6      :  89              </span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     (Other):952               (Other):  68              </span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     NA&#39;s   :806               NA&#39;s   :1425              </span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   study     </span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1   :3006  </span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2   :1664  </span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  NA&#39;s: 806  </span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             </span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             </span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             </span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     ncdsid          gender  RG91     health        employ    study  </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Length:365         1:178   0 : 8   1   :121   1      :102   1:231  </span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Class :character   2:187   10:18   2   :195   7      : 87   2:134  </span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Mode  :character           20:95   3   : 41   4      : 76          </span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             31:88   4   :  6   3      : 32          </span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             32:74   NA&#39;s:  2   6      :  7          </span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             40:68              (Other):  3          </span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                             50:14              NA&#39;s   : 58</span></span></code></pre></div>
+<p>From these descriptive statistics, we can make the following
+remarks:</p>
+<ol style="list-style-type: decimal">
+<li>Each of the files contains only one scale measuring the social class
+of the participants: the <em>ncds_14</em> database measures the social
+class from the <strong>G090</strong> scale only, which currently makes
+it impossible to study this variable on all the waves of data collection
+carried out.</li>
+<li>The other variables seem at first sight labeled and coded in a
+similar way from one dataset to another.</li>
+<li>Some variables have incomplete informations (including social class
+scales in <em>ncds_14</em>) and the missingness structures seems
+independant from the databases.</li>
+<li>There are only a few variables contained in the two databases.</li>
+<li>Same labels predictors are not sorted in the same order from one
+database to another.</li>
+</ol>
+<p> </p>
+</div>
+<div id="handling-missing-information" class="section level3">
+<h3>Handling missing information</h3>
+<p> </p>
+<p align="justify">
+Firsly, <strong>JOINT</strong> algorithms from the
+<strong>OT_joint</strong> function of the package requires complete
+predictors to run, which is not the case for <strong>OUTCOME</strong>
+algorithms implemented in the <strong>OT_outcome</strong> function.
+Keeping this information in mind, we know that for a comparison of these
+two families of algorithm, it will be necessary to work either with
+complete cases predictors or to carry out a preliminary imputation on
+them before the data fusion.
+</p>
+<p>The <strong>merge_dbs</strong> function can solve problems 2 and 3
+introduced in the previous paragraph:</p>
+<ul>
+<li>by removing from the upcoming data fusion, participants whose social
+class informations are missing from their databases (corresponding to
+806 participants in <em>ncds_14</em>).</li>
+<li>by detecting and excluding predictors, labeled and/or coded
+differently from one database to another.</li>
+<li>possibly imputing incomplete predictors using MICE or FAMD
+procedures (see the documentation of <strong>imput_cov</strong> for
+mored details about the methods).</li>
+<li>finally, by superimposing the two datasets by only keeping the
+shared predictors.</li>
+</ul>
+<p align="justify">
+Here is the R code related to a MICE imputation (with only 2
+replications for running time reasons of the vignette). Using the MICE
+procedure directly integrated in <strong>merge_dbs</strong> supposes
+that the user accepts the hypothesis that all predictors will
+participate to the imputation.
+</p>
+<p align="justify">
+In situation where this hypothesis does not hold but imputation still
+appear as necessary, the imputation of missing values will have to be
+done through another function (not provided by the package).
+</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>merged_tab <span class="ot">&lt;-</span> <span class="fu">merge_dbs</span>(ncds_14, ncds_5,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">row_ID1 =</span> <span class="dv">1</span>, <span class="at">row_ID2 =</span> <span class="dv">1</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">NAME_Y =</span> <span class="st">&quot;GO90&quot;</span>, <span class="at">NAME_Z =</span> <span class="st">&quot;RG91&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">ordinal_DB1 =</span> <span class="dv">3</span>, <span class="at">ordinal_DB2 =</span> <span class="dv">4</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">impute =</span> <span class="st">&quot;MICE&quot;</span>, <span class="at">R_MICE =</span> <span class="dv">2</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">seed_choice =</span> <span class="dv">3023</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; DBS MERGING in progress. Please wait ...</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; DBS MERGING OK</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -----------------------</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; SUMMARY OF DBS MERGING:</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Nb of removed subjects due to NA on targets: 806(14%)</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Nb of removed covariates due to differences between the 2 bases: 0</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Nb of remained covariates: 4</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Imputation on incomplete covariates: MICE</span></span></code></pre></div>
+<p>Process details indicate here that 806 participants have been deleted
+from the data fusion because of missing information on
+<strong>GO90</strong> in the <em>ncds_14</em> database.</p>
+<p align="justify">
+By definition, <strong>GO90</strong> in <em>ncds_14</em> and
+<strong>RG91</strong> in <em>ncds_5</em> does not seem to correspond
+clearly to ordered scales and can be considered as simple factors. This
+is the case here, because the only variable defined as an ordered factor
+in the study is the <em>health</em> variable. This variable correspond
+to the third column of <em>ncds_14</em> and to the fourth column of
+<em>ncds_5</em>. A seed value is arbitrarily fixed to 3023 here to
+guarantee the reproductibility of the results in the vignette.
+</p>
+<p>In the output list, The <em>DB_READY</em> object provides the
+overlayed database with the shared predictors imputed as described
+by:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(merged_tab<span class="sc">$</span>DB_READY); <span class="fu">dim</span>(merged_tab<span class="sc">$</span>DB_READY)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      DB  Y    Z employ gender health study</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5708  1 20 &lt;NA&gt;      3      1      1     1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5709  1 71 &lt;NA&gt;      1      1      2     1</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5710  1 32 &lt;NA&gt;      1      2      1     1</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5711  1 60 &lt;NA&gt;      7      1      1     1</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5712  1 31 &lt;NA&gt;      7      2      2     1</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5714  1 31 &lt;NA&gt;      1      1      3     1</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 5035    7</span></span></code></pre></div>
+<p>All predictors same labels were finally kept: their coding being
+visibly in adequacy from one dataset to another.</p>
+<p> </p>
+</div>
+<div id="matching-predictors-evaluation" class="section level3">
+<h3>Matching predictors evaluation</h3>
+<p> </p>
+<p align="justify">
+Here, the limited number of predictors at the beginning of the study
+makes it unnecessary to use a selection procedure like random forest,
+nevertheless the <strong>select_pred</strong> function can provide users
+interesting information about the association of predictors, their
+ability to fit the target scales in each dataset, and their risks of
+collinearities, especially if it is necessary to further reduce the set
+of sharing predictors before recoding scales.
+</p>
+<p align="justify">
+Keeping too many predictors for the fusion does not improve its quality
+and greatly increases the resolution time of the algorithms, that is
+why, as an advice, keeping only 3 predictors for each fusion seems to be
+a good compromise between computation time and efficiency.
+</p>
+<p>Let’s use the results of the <strong>select_pred</strong> function to
+only keep 3 predictors for data fusion (instead of the four currently
+present).</p>
+<p>Here is the related R code taking the database obtained after
+executing <strong>merge_dbs</strong> as argument, and the variables
+<strong>GO90</strong> and <strong>RG91</strong> as respective outcomes
+in the two datasets:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ncds_14</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>sel_pred_GO90 <span class="ot">&lt;-</span> <span class="fu">select_pred</span>(merged_tab<span class="sc">$</span>DB_READY,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">Y =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">Z =</span> <span class="st">&quot;Z&quot;</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">ID =</span> <span class="dv">1</span> , <span class="at">OUT =</span> <span class="st">&quot;Y&quot;</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                             <span class="at">nominal =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">7</span>), <span class="at">ordinal =</span> <span class="dv">6</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                             <span class="at">RF =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The select_pred function is running for outcome= Y. Please wait ...</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The process is now successfully completed</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; For comparison with another outcome from two overlayed tables  : </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; just adapt the OUT option keeping all the others unchanged in the function</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; For comparison with another outcome from two unoverlayed tables:</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; just adapt the arguments from Y to convert_class</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ncds_5</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sel_pred_RG91 <span class="ot">&lt;-</span> <span class="fu">select_pred</span>(merged_tab<span class="sc">$</span>DB_READY, <span class="at">Y =</span> <span class="st">&quot;Y&quot;</span>, <span class="at">Z =</span> <span class="st">&quot;Z&quot;</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">ID =</span> <span class="dv">1</span>, <span class="at">OUT =</span> <span class="st">&quot;Z&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">nominal =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">7</span>), <span class="at">ordinal =</span> <span class="dv">6</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                             <span class="at">RF =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The select_pred function is running for outcome= Z. Please wait ...</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; The process is now successfully completed</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; For comparison with another outcome from two overlayed tables  : </span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; just adapt the OUT option keeping all the others unchanged in the function</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; For comparison with another outcome from two unoverlayed tables:</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; just adapt the arguments from Y to convert_class</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------</span></span></code></pre></div>
+<p>Automatic exits inform the user about the state of the process and
+assist him in the implementation of the function.</p>
+<p align="justify">
+We first study the existence of potential collinearity between the
+predictors. At the acceptability thresholds set by default as input to
+the <strong>merge_dbs</strong> function, and in particular, the one
+associated with the V-Cramer criterion, we detect collinearity in the
+two bases, between the variables <em>employ</em> and <em>gender</em>, as
+described below:
+</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ncds_14</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sel_pred_GO90<span class="sc">$</span>collinear_PB<span class="sc">$</span>VCRAM</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     name1  name2 V_Cramer CorrV_Cramer    N</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21 employ gender   0.4831       0.4819 4670</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="do">## ncds_5</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>sel_pred_RG91<span class="sc">$</span>collinear_PB<span class="sc">$</span>VCRAM</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     name1  name2 V_Cramer CorrV_Cramer   N</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21 employ gender   0.6169       0.6042 365</span></span></code></pre></div>
+<p>This result suggests that we should keep only one of these two
+predictors. But which of the two should we keep? <em>employ</em> or
+<em>gender</em> ?</p>
+<p>To help us decide, we can simply observe the ability of the two
+variables to predict the target variables in the two databases:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ncds_14</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>sel_pred_GO90<span class="sc">$</span>vcrm_OUTC_cat</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   name1  name2 V_Cramer CorrV_Cramer    N</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     Y gender   0.4911       0.4888 4670</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     Y  study   0.4491       0.4465 4670</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     Y employ   0.1765       0.1698 4670</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     Y health   0.1141       0.1033 4670</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="do">## ncds_5</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>sel_pred_RG91<span class="sc">$</span>vcrm_OUTC_cat</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   name1  name2 V_Cramer CorrV_Cramer   N</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5     Z  study   0.4507       0.4326 365</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3     Z gender   0.4367       0.4180 365</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2     Z employ   0.2070       0.1637 365</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4     Z health   0.1579       0.0923 365</span></span></code></pre></div>
+<p>These results present two variables whose ability to predict the
+target variable is equivalent in the two databases. How do these
+variables interact with the other predictors?</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ncds_14</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sel_pred_GO90<span class="sc">$</span>vcrm_X_cat</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     name1  name2 V_Cramer CorrV_Cramer    N</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21 employ gender   0.4831       0.4819 4670</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41 employ  study   0.2318       0.2290 4670</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23 health  study   0.1623       0.1603 4670</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 31 employ health   0.1167       0.1111 4670</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 32 gender  study   0.0720       0.0705 4670</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22 gender health   0.0433       0.0351 4670</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="do">## ncds_5</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>sel_pred_RG91<span class="sc">$</span>vcrm_X_cat</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;     name1  name2 V_Cramer CorrV_Cramer   N</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 21 employ gender   0.6169       0.6042 365</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 41 employ  study   0.2979       0.2692 365</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 31 employ health   0.2676       0.2358 365</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 23 health  study   0.1873       0.1640 365</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 22 gender health   0.0716       0.0000 365</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 32 gender  study   0.0017       0.0000 365</span></span></code></pre></div>
+<p align="justify">
+The stronger association in both datasets of the variable
+<em>employ</em> with <em>study</em>, compared to that observed with the
+variable <em>gender</em>, would rather encourage us to keep
+<em>gender</em> for the data fusion. Even if, it is also true that this
+selection criterion remains very tenuous here.
+</p>
+<p>We therefore decide to keep the <em>study</em>, <em>gender</em> and
+<em>health</em> predictors to solve our recoding problem.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>merged_fin <span class="ot">=</span> merged_tab<span class="sc">$</span>DB_READY[, <span class="sc">-</span><span class="dv">4</span>]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(merged_fin, <span class="dv">3</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;      DB  Y    Z gender health study</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5708  1 20 &lt;NA&gt;      1      1     1</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5709  1 71 &lt;NA&gt;      1      2     1</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5710  1 32 &lt;NA&gt;      2      1     1</span></span></code></pre></div>
+<p> </p>
+</div>
+<div id="imputation-of-go90-using-optimal-transportation-theory" class="section level3">
+<h3>Imputation of GO90 using optimal transportation theory</h3>
+<p align="justify">
+The imputation of <strong>GO90</strong> in the <em>ncds_5</em> can be
+the result of two family of algorithms in <strong>OTrecod</strong>:
+<strong>OUTCOME</strong> or <strong>JOINT</strong>. Both of them used
+optimal transportation theory and can be eventually improved by relaxing
+the distributional assumptions.
+</p>
+<p><strong>OUTCOME</strong> algorithms are implemented in the
+<strong>OT_outcome</strong> function while <strong>JOINT</strong>
+algorithms are implemented in <strong>OT_JOINT</strong>.</p>
+<p>It is suggested to fit and compare several models using the output
+criteria of the <strong>verif_OT</strong> function, to determine which
+one provides the better set of <strong>GO90</strong> predictions in
+<em>ncds_5</em>.</p>
+<p>Here is the R commands to fit an <strong>OUTCOME</strong> model and a
+<strong>JOINT</strong> model with no relaxation and regularization
+parameter.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>outc1 <span class="ot">=</span> <span class="fu">OT_outcome</span>(merged_fin, <span class="at">nominal =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>), <span class="at">ordinal =</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">6</span>,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">dist.choice =</span> <span class="st">&quot;E&quot;</span>, <span class="at">indiv.method =</span> <span class="st">&quot;sequential&quot;</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">which.DB =</span> <span class="st">&quot;B&quot;</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------------------------------</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; OT PROCEDURE in progress ...</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------------------------------</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Type                     = OUTCOME</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Distance                 = Euclidean</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Percent closest knn      = 100%</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Relaxation parameter     = NO</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Relaxation value         = 0</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Individual pred process  = Sequential</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; DB imputed               = B</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------------------------------</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>outj1 <span class="ot">=</span> <span class="fu">OT_joint</span>(merged_fin, <span class="at">nominal =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">ordinal =</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">6</span>,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">dist.choice =</span> <span class="st">&quot;E&quot;</span>, <span class="at">which.DB =</span> <span class="st">&quot;B&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------------------------------</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; OT JOINT PROCEDURE in progress ...</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------------------------------</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Type                  = JOINT</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Distance              = Euclidean</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Percent closest       = 100%</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Relaxation term       = 0</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Regularization term   = 0</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Aggregation tol cov   = 0.3</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; DB imputed            = B</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---------------------------------------</span></span></code></pre></div>
+<p> </p>
+<p align="justify">
+Now let’s see the validity criteria of the two models using the
+<strong>verif_OT</strong> function. we simply want to retrieve the
+stability criteria and Cramer’s V which compares the association of the
+two different (unordered) scales and so complete the arguments according
+to this choice:
+</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outc1</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>verif_outc1   <span class="ot">=</span> <span class="fu">verif_OT</span>(outc1, <span class="at">ordinal =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                         <span class="at">stab.prob =</span> <span class="cn">TRUE</span>, <span class="at">min.neigb =</span> <span class="dv">5</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outj1</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>verif_outj1   <span class="ot">=</span> <span class="fu">verif_OT</span>(outj1, <span class="at">ordinal =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>                         <span class="at">stab.prob =</span> <span class="cn">TRUE</span>, <span class="at">min.neigb =</span> <span class="dv">5</span>)</span></code></pre></div>
+<p align="justify">
+Firstly, the estimates of the Hellinger distance for the two models
+(both upper 0.05) confirm that the two scales could respectively share
+the same distribution in the two databases. Consequently, there is no
+need here to add relaxation parameters in the models to have acceptable
+predictions of <strong>GO90</strong> in <em>ncds_5</em>.
+</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outc1: Hellinger distance</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>verif_outc1<span class="sc">$</span>hell</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 YA_YB ZA_ZB</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Hellinger dist. 0.085    NA</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outj1: Hellinger distance</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>verif_outj1<span class="sc">$</span>hell</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                 YA_YB ZA_ZB</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Hellinger dist. 0.208    NA</span></span></code></pre></div>
+<p align="justify">
+The V Cramer criterion informs about the strength of the association
+between the two scales. Even if they have specific encodings,
+<strong>GO90</strong> and <strong>RG91</strong> summarize a same
+information: the social class of the participant. Therefore, we can
+reasonably think that the stronger will be the association, the more
+reliable will be the predictions.
+</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outc1: Hellinger distance</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>verif_outc1<span class="sc">$</span>res.prox</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        N   V_cram rank_cor </span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  365.000    0.640    0.736</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outj1: Hellinger distance</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>verif_outj1<span class="sc">$</span>res.prox</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        N   V_cram rank_cor </span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  365.000    0.740    0.899</span></span></code></pre></div>
+<p>The large number of modalities of <strong>GO90</strong> explains the
+relative stability observed for the predictions:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outc1: Hellinger distance</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>verif_outc1<span class="sc">$</span>res.stab</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          N min.N mean    sd</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2nd DB 270     5 0.77 0.288</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="do">### For the model outj1: Hellinger distance</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>verif_outj1<span class="sc">$</span>res.stab</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          N min.N  mean    sd</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2nd DB 270     5 0.644 0.152</span></span></code></pre></div>
+</div>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p align="justify">
+The two models provide acceptable predictions of <strong>GO90</strong>
+in <em>ncds_5</em>. Nevertheless, the <strong>JOINT</strong> algorithm
+is here prefered for the reasons previously exposed (no relaxation and
+regularization parameters required, better reliability of predictions
+with this specific database).
+</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
